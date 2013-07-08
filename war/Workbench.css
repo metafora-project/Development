@@ -1,0 +1,41 @@
+/** Add css rules here for your application. */
+
+
+/** Example rules used by the template application (remove for your app) */
+/**Heading Layout*/
+body {
+  padding: 10px;
+}
+
+.flextable{
+  border-style:solid;
+  border-width: 1px;
+  border-color: blue;
+  /**padding: 5px; Abstand zwischen Komponenten*/
+}
+
+.row{
+  front-size: 10px;
+}
+
+.button{
+  display: block;
+  font-size: 10px;
+}
+
+.heading{
+  font-size: 15px;
+  font-weight: bold;
+  color: #777777;
+  text-align: center;
+}
+
+.rotate {
+  -moz-border-radius: 10px 10px 0px 0px; 
+  -webkit-border-radius: 10px 10px 0px 0px;
+  -webkit-transform: rotate(+90deg);
+  -moz-transform: rotate(+90deg);
+  -ms-transform: rotate(+90deg);
+  -o-transform: rotate(+90deg);
+  transform: rotate(+90deg);
+ }
