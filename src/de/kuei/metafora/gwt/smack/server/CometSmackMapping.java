@@ -1,14 +1,8 @@
 package de.kuei.metafora.gwt.smack.server;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-import java.util.Vector;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import net.zschech.gwt.comet.server.CometServletResponse;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,57 +12,28 @@ import org.w3c.dom.NodeList;
 import de.kuei.metafora.gwt.smack.server.user.GroupMembers;
 import de.kuei.metafora.gwt.smack.server.xml.XMLException;
 import de.kuei.metafora.gwt.smack.server.xml.XMLUtils;
+import de.kuei.metafora.gwt.smack.shared.event.breakingnews.BreakingNewsEventImpl;
+import de.kuei.metafora.gwt.smack.shared.eventservice.EventServiceDomains;
 import de.kuei.metafora.xmpp.XMPPMessageTimeListener;
+import de.novanic.eventservice.client.event.domain.DomainFactory;
+import de.novanic.eventservice.service.registry.EventRegistryFactory;
 
 public class CometSmackMapping implements XMPPMessageTimeListener {
 
 	private static CometSmackMapping mapping = null;
 
-	private final static Lock lock = new ReentrantLock();
-
 	public static CometSmackMapping getInstance() {
-		try {
-			if (mapping == null) {
-				mapping = new CometSmackMapping();
-			}
-			return mapping;
-		} catch (Exception e) {
-			System.err.println("CometSmackMapping.getInstance(): "
-					+ e.toString());
-			return mapping;
+		if (mapping == null) {
+			mapping = new CometSmackMapping();
 		}
+		return mapping;
 	}
 
-	private Vector<CometServletResponse> clientChannels;
-
-	public CometSmackMapping() throws Exception {
-		try {
-			if (mapping != null) {
-				throw new Exception(
-						"Something went wrong. There is already a mapping class.");
-			}
-			clientChannels = new Vector<CometServletResponse>();
-		} catch (Exception e) {
-			System.err.println("CometSmackMapping() constructor: "
-					+ e.toString());
-		}
-	}
-
-	public void registerUser(CometServletResponse response) {
-		clientChannels.add(response);
-	}
-
-	public void unregisterUser(CometServletResponse response) {
-		// This method is called after every write process so it is no
-		// good idea to close the xmpp connection if there is no client!
-		// TODO: Find a solution with a timeout of a few seconds.
-		clientChannels.remove(response);
+	private CometSmackMapping() {
 	}
 
 	@Override
 	public void newMessage(String user, String message, String chat, Date time) {
-		String msg = "";
-
 		try {
 			message = message.replaceAll("\n", "");
 		} catch (Exception e) {
@@ -83,7 +48,7 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 		System.err.println("Workbench.CometSmackMapping.newMessage(): "
 				+ message);
 
-		if (chat.contains("analysis")) {
+		if (chat.toLowerCase().contains("analysis")) {
 			if (message
 					.matches(".*[<][ ]*description[ ]*[>].*[<][ ]*[/]description[ ]*[>].*")) {
 				try {
@@ -95,6 +60,13 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 						String type = actiontype.getAttributes()
 								.getNamedItem("type").getTextContent();
 						if (type.toLowerCase().equals("landmark")) {
+
+							String l2l2Tag = null;
+							String iconURL = StartupServlet.apacheserver
+									+ "/images/l2l2/generic.jpg";
+							String description = "";
+							long timestamp = time.getTime();
+
 							NodeList nl = doc
 									.getElementsByTagName("description");
 							for (int i = 0; i < nl.getLength(); i++) {
@@ -102,53 +74,68 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 								NodeList descChilds = e.getChildNodes();
 								for (int j = 0; j < descChilds.getLength(); j++) {
 									Node node = descChilds.item(j);
-									msg += node.getTextContent();
+									description += node.getTextContent();
 								}
 								if (i < nl.getLength() - 1) {
-									msg += "\n";
+									description += "\n";
 								}
 							}
 
 							NodeList properties = doc
 									.getElementsByTagName("property");
-							String landmarkType = null;
+
 							for (int k = 0; k < properties.getLength(); k++) {
 								Node propertyNode = properties.item(k);
 								String name = propertyNode.getAttributes()
 										.getNamedItem("name").getTextContent();
 								if (name.toLowerCase().equals("l2l2_tag")) {
-									landmarkType = propertyNode.getAttributes()
+									l2l2Tag = propertyNode.getAttributes()
 											.getNamedItem("value")
 											.getTextContent();
 								}
-							}
 
-							msg += "##" + landmarkType;
-
-							String l2l2Url = StartupServlet.apacheserver
-									+ "/images/l2l2/generic.jpg";
-							if (landmarkType != null) {
-								try {
-									String urlText = StartupServlet.apacheserver
-											+ "/images/l2l2/"
-											+ landmarkType.toLowerCase()
-											+ ".jpg";
-									URL url = new URL(urlText);
-									HttpURLConnection con = (HttpURLConnection) url
-											.openConnection();
-									con.setRequestMethod("HEAD");
-									if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
-										l2l2Url = urlText;
-									} else {
-										System.err.println("Image " + urlText
-												+ " not found. Status code: "
-												+ con.getResponseCode());
+								if (l2l2Tag != null) {
+									/*
+									 * test whether a specific icon exists for
+									 * this L2L2-category and update iconURL
+									 */
+									try {
+										String urlText = StartupServlet.apacheserver
+												+ "/images/l2l2/"
+												+ l2l2Tag.toLowerCase()
+												+ ".jpg";
+										URL url = new URL(urlText);
+										HttpURLConnection con = (HttpURLConnection) url
+												.openConnection();
+										con.setRequestMethod("HEAD");
+										if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+											iconURL = urlText;
+										} else {
+											System.err
+													.println("Image "
+															+ urlText
+															+ " not found. Status code: "
+															+ con.getResponseCode());
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
 									}
-								} catch (Exception e) {
-									e.printStackTrace();
 								}
 							}
-							msg += "##" + l2l2Url;
+
+							EventRegistryFactory
+									.getInstance()
+									.getEventRegistry()
+									.addEvent(
+											DomainFactory
+													.getDomain(EventServiceDomains.BREAKINGNEWSDOMAIN),
+											new BreakingNewsEventImpl(
+													description, l2l2Tag,
+													iconURL, timestamp));
+							System.err
+									.println("Workbench: CometSmackMapping.newMessage(): new Event of type "
+											+ l2l2Tag);
+
 						}
 					}
 				} catch (Exception e) {
@@ -248,37 +235,6 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 					return;
 				}
 			}
-		}
-
-		System.err.println("Workbench: CometSmackMapping.newMessage(): msg = "
-				+ msg);
-
-		if (msg != null && msg.length() != 0) {
-
-			lock.lock();
-
-			Vector<CometServletResponse> invalidCometConnections = new Vector<CometServletResponse>();
-
-			for (int i = 0; i < clientChannels.size(); i++) {
-				try {
-					clientChannels.get(i).write(
-							chat + "::" + time.getTime() + "::" + msg);
-					System.err
-							.println("DEBUG: CometSmackMapping finally sent: "
-									+ chat + "::" + time.getTime() + "::" + msg);
-				} catch (IOException e) {
-					System.err
-							.println("Workbench: CometSmackMapping.newMessage(): Comet Error: "
-									+ e.getMessage());
-					invalidCometConnections.add(clientChannels.get(i));
-				}
-			}
-
-			for (CometServletResponse response : invalidCometConnections) {
-				clientChannels.remove(response);
-			}
-
-			lock.unlock();
 		}
 	}
 }

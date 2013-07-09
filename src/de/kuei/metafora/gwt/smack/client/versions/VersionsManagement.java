@@ -10,14 +10,6 @@ public class VersionsManagement extends TableLayout {
 
 	public VersionsManagement() {
 		super();
-
-		/*
-		 * HTML today = new
-		 * HTML("["+DateTimeFormat.getMediumDateTimeFormat().format(new
-		 * Date())+"]", true); Anchor a = new Anchor("Task 1");
-		 * a.addClickHandler(new VersionsHandler("Task 1", "12345", "", ""));
-		 * box.setWidget(row, column-1, today); box.setWidget(row, column, a);
-		 */
 	}
 
 	public void add(Anchor a, String time) {

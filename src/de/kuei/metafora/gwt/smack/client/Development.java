@@ -15,12 +15,11 @@ public class Development extends TableLayout {
 		super();
 	}
 
-	public void add(String s, String time, String title, String l2l2Url) {
+	public void add(String s, String time, String title, String landmarkURL) {
 		DateConverter dc = new DateConverter(time);
-		Image img = new Image(l2l2Url);
+		Image img = new Image(landmarkURL);
 		img.setWidth("30px");
-		if (!title.equals("null"))
-			img.setTitle(title);
+		img.setTitle(title);
 		String currentTime = dc.convertTime();
 		Label today = new Label(currentTime, false);
 		Label message = new Label(s);

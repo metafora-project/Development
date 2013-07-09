@@ -12,14 +12,14 @@
 	<load-on-startup>3</load-on-startup>
   </servlet>
   
-   <servlet>
-  	<servlet-name>comet</servlet-name>
-	<servlet-class>de.kuei.metafora.gwt.smack.server.CometImpl</servlet-class>
+    <servlet>
+  <servlet-name>eventServiceImpl</servlet-name>
+     <servlet-class>de.novanic.eventservice.service.EventServiceImpl</servlet-class>
   </servlet>
-  
+
   <servlet-mapping>
-    <servlet-name>comet</servlet-name>
-    <url-pattern>/development/comet</url-pattern>
+    <servlet-name>eventServiceImpl</servlet-name>
+    <url-pattern>/development/gwteventservice</url-pattern>
   </servlet-mapping>
   
   <servlet>

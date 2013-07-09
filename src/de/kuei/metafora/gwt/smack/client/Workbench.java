@@ -1,24 +1,17 @@
 package de.kuei.metafora.gwt.smack.client;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
-import net.zschech.gwt.comet.client.CometClient;
-import net.zschech.gwt.comet.client.CometListener;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -28,28 +21,34 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.Element;
-import com.google.gwt.xml.client.NodeList;
-import com.google.gwt.xml.client.XMLParser;
 
 import de.kuei.metafora.gwt.smack.client.documents.DocumentCallBack;
 import de.kuei.metafora.gwt.smack.client.documents.DocumentService;
 import de.kuei.metafora.gwt.smack.client.documents.DocumentServiceAsync;
 import de.kuei.metafora.gwt.smack.client.documents.Documents;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.breakingnews.BreakingNewsListener;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.breakingnews.BreakingNewsListenerImpl;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.documents.DocumentsListener;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.documents.DocumentsListenerImpl;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.versions.VersionsListener;
+import de.kuei.metafora.gwt.smack.client.eventServiceListeners.versions.VersionsListenerImpl;
 import de.kuei.metafora.gwt.smack.client.groupMembers.GroupMemberListener;
 import de.kuei.metafora.gwt.smack.client.groupMembers.GroupMemberListenerAsync;
 import de.kuei.metafora.gwt.smack.client.handler.MessagingToolHandler;
-import de.kuei.metafora.gwt.smack.client.handler.VersionsHandler;
 import de.kuei.metafora.gwt.smack.client.versions.VersionsCallBack;
 import de.kuei.metafora.gwt.smack.client.versions.VersionsManagement;
 import de.kuei.metafora.gwt.smack.client.versions.VersionsService;
 import de.kuei.metafora.gwt.smack.client.versions.VersionsServiceAsync;
+import de.kuei.metafora.gwt.smack.shared.eventservice.EventServiceDomains;
+import de.novanic.eventservice.client.event.RemoteEventService;
+import de.novanic.eventservice.client.event.RemoteEventServiceFactory;
+import de.novanic.eventservice.client.event.domain.Domain;
+import de.novanic.eventservice.client.event.domain.DomainFactory;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class Workbench extends HorizontalPanel implements EntryPoint,
-		CometListener {
+public class Workbench extends HorizontalPanel implements EntryPoint {
 
 	// object needed to implement i18n through Languages interface
 	final static Languages language = GWT.create(Languages.class);
@@ -66,25 +65,33 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 
 	public static HorizontalPanel hPanel1, hPanel2, hPanel3;
 	public static VerticalPanel vPanel1, vPanel2;
-	Development development;
+	private Development development;
 
-	Documents doctable;
-	VersionsManagement vm;
+	private Documents doctable;
+	private VersionsManagement vm;
 
 	private final FormPanel enterF = new FormPanel();
 	private HorizontalPanel uploadPanel = new HorizontalPanel();
 	private FileUpload search = new FileUpload();
 	private Button send;
+
 	private DocumentServiceAsync dsa = GWT.create(DocumentService.class);
 	private VersionsServiceAsync versionsService = GWT
 			.create(VersionsService.class);
-	private String message;
-	private Document doc;
-	private String name;
-	private String id;
-	private String link;
-	private String version;
-	private String[] msg;
+
+	private RemoteEventService remoteEventService;
+
+	private static Domain breakingNewsDomain = DomainFactory
+			.getDomain(EventServiceDomains.BREAKINGNEWSDOMAIN);
+	private static Domain documentsDomain = DomainFactory
+			.getDomain(EventServiceDomains.DOCUMENTSDOMAIN);
+	private static Domain versionsDomain = DomainFactory
+			.getDomain(EventServiceDomains.VERSIONSDOMAIN);
+
+	private BreakingNewsListener breakingNewsListener;
+	private DocumentsListener documentsListener;
+	private VersionsListener versionsListener;
+
 
 	public void onModuleLoad() {
 		hPanel1 = new HorizontalPanel();
@@ -136,12 +143,6 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 			}
 		}
 
-		/*
-		 * Collection<String> cookies = Cookies.getCookieNames(); if (cookies !=
-		 * null) wasReload = true;
-		 */
-
-		// set groupmembers
 		groupMemberListener.setGroupMembers(Workbench.groupId, Workbench.users,
 				new AsyncCallback<Void>() {
 					@Override
@@ -159,10 +160,6 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 		development = new Development();
 		vPanel1.add(development);
 
-		CometClient client = new CometClient(GWT.getModuleBaseURL() + "comet",
-				this);
-		client.start();
-
 		Label dc = new Label(language.Documents());
 		dc.setStyleName("heading");
 		vPanel2.add(dc);
@@ -172,15 +169,9 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 		} else {
 			enterF.setAction("https://metaforaserver.ku.de/workbench/development/fileupload");
 		}
-		// enterF.setAction("http://localhost:8888/development/fileupload");
-		// //sagt, wo Servlet ist
-		enterF.setEncoding(FormPanel.ENCODING_MULTIPART); // sagt, was geschickt
-															// werden darf
-		enterF.setMethod(FormPanel.METHOD_POST); // sagt, welche Methode
-													// aufgerufen werden darf
-		// die drei obigen Methoden braucht man, damit man beim Button Send nur
-		// noch .submit() aufrufen braucht, damit die Methode doPost()
-		// ausgef�hrt wird!
+
+		enterF.setEncoding(FormPanel.ENCODING_MULTIPART);
+		enterF.setMethod(FormPanel.METHOD_POST);
 
 		String user = null;
 		for (String u : users) {
@@ -261,54 +252,61 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 
 		setVisible(true);
 
-		/*
-		 * if (wasReload) { Collection<String> cookies =
-		 * Cookies.getCookieNames(); for (String cn : cookies) { if (cn != null
-		 * && cn.startsWith("metaforaDevelopment")) { String message =
-		 * Cookies.getCookie(cn); msg = message.toString().split("::", 3);
-		 * String[] type = msg[2].split("##", 2); development.add(type[0],
-		 * msg[1], type[1]); } } }
-		 */
 		RootPanel rootLayout = RootPanel.get();
 		rootLayout.add(this);
 		Window.enableScrolling(true);
+
+		remoteEventService = RemoteEventServiceFactory.getInstance()
+				.getRemoteEventService();
+		breakingNewsListener = new BreakingNewsListenerImpl(development);
+		documentsListener = new DocumentsListenerImpl(doctable);
+		versionsListener = new VersionsListenerImpl(vm);
+
+		remoteEventService.addListener(breakingNewsDomain,
+				breakingNewsListener, new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Error registering the BreakingNewsListener:\n"
+								+ caught.getMessage());
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+					}
+				});
+
+		remoteEventService.addListener(documentsDomain, documentsListener,
+				new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Error registering the DocumentsListener:\n"
+								+ caught.getMessage());
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+					}
+				});
+
+		remoteEventService.addListener(versionsDomain, versionsListener,
+				new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Error registering the VersionsListener:\n"
+								+ caught.getMessage());
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+					}
+				});
 	}
 
-	/*
-	 * public void setCookie(String name, String value) { Date now = new Date();
-	 * long nowLong = now.getTime(); nowLong = nowLong + (1000 * 60 * 60 *
-	 * 20);// keep logged in for 20 // hours now.setTime(nowLong);
-	 * 
-	 * Cookies.setCookie(name, value, now); }
-	 * 
-	 * public void deleteAllCookies() { Collection<String> cookies =
-	 * Cookies.getCookieNames(); for (String cookie : cookies) { if
-	 * (cookie.startsWith("metafora")) { Cookies.removeCookie(cookie); } } }
-	 */
-	@Override
-	public void onConnected(int heartbeat) {
-	}
-
-	@Override
-	public void onDisconnected() {
-	}
-
-	@Override
-	public void onError(Throwable exception, boolean connected) {
-		// Window.alert("Workbench.onError(): " + exception.getMessage() + ", "
-		// + exception);
-	}
-
-	@Override
-	public void onHeartbeat() {
-	}
-
-	@Override
-	public void onRefresh() {
-	}
-
-	@Override
-	public void onMessage(List<? extends Serializable> messages) {
+	// TODO remove this method after moving it to server-side
+/*	public void onMessage(List<? extends Serializable> messages) {
 		for (int i = 0; i < messages.size(); i++) {
 			msg = messages.get(i).toString().split("::", 3);
 			if (msg[0].contains("command")) {
@@ -358,42 +356,7 @@ public class Workbench extends HorizontalPanel implements EntryPoint,
 					vm.add(anchor, msg[1]);
 				}
 			}
-			if (msg[0].contains("analysis")) {
-				Boolean add = true;
-
-				Collection<String> cookies = Cookies.getCookieNames();
-				for (String cn : cookies) {
-					if (cn != null && cn.startsWith("metaforaDevelopment")) {
-						String message = Cookies.getCookie(cn);
-						if ((message.contains("received Feedback message"))
-								&& (message.equals(msg[2]))) {
-							add = false;
-						}
-					}
-				}
-
-				if (add) {
-					String[] type = msg[2].split("##");
-					development.add(type[0], msg[1], type[type.length - 2],
-							type[type.length - 1]);
-
-				}
-			} else if (msg[0].contains("DocIdService")) {
-				// the message comes from DocIdServiceImpl and contains the ID
-				// document from the couchDB
-
-				String[] values = msg[2].split(";", 2);
-				// values[0] is the fileid
-				// values[1] is the filename
-
-				if (values.length == 2) {
-					Anchor a = new Anchor(values[0]);
-					a.setTarget("_parent");
-					doctable.add(values[1], a, msg[1]);
-				} else {
-					Window.alert(messages.get(i).toString());
-				}
-			}
 		}
 	}
+*/
 }
