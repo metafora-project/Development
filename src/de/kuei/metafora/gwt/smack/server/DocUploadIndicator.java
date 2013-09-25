@@ -8,7 +8,6 @@ import org.w3c.dom.Element;
 
 import de.kuei.metafora.gwt.smack.server.xml.XMLException;
 import de.kuei.metafora.gwt.smack.server.xml.XMLUtils;
-import de.kuei.metafora.xmpp.XMPPBridge;
 
 public class DocUploadIndicator {
 
@@ -34,12 +33,7 @@ public class DocUploadIndicator {
 			Element actiontype = doc.createElement("actiontype");
 			actiontype.setAttribute("type", "INDICATOR");
 			actiontype.setAttribute("classification", "other");
-			if (StartupServlet.productive) {
-				actiontype.setAttribute("logged", "true");
-			} else {
-				actiontype.setAttribute("logged", "false");
-			}
-			action.appendChild(actiontype);
+			actiontype.setAttribute("logged", "" + StartupServlet.logged);
 
 			for (String u : users) {
 				Element userElement = doc.createElement("user");
@@ -60,11 +54,7 @@ public class DocUploadIndicator {
 			property = doc.createElement("property");
 			properties.appendChild(property);
 			property.setAttribute("name", "SENDING_TOOL");
-			if (StartupServlet.productive) {
-				property.setAttribute("value", "WORKBENCH");
-			} else {
-				property.setAttribute("value", "WORKBENCH_TEST");
-			}
+			property.setAttribute("value", StartupServlet.sending_tool);
 
 			property = doc.createElement("property");
 			properties.appendChild(property);
@@ -101,22 +91,18 @@ public class DocUploadIndicator {
 			property2 = doc.createElement("property");
 			contentProperties.appendChild(property2);
 			property2.setAttribute("name", "SENDING_TOOL");
-			if (StartupServlet.productive) {
-				property2.setAttribute("value", "WORKBENCH");
-			} else {
-				property2.setAttribute("value", "WORKBENCH_TEST");
-			}
+			property2.setAttribute("value", StartupServlet.sending_tool);
 
 			property2 = doc.createElement("property");
 			contentProperties.appendChild(property2);
 			property2.setAttribute("name", "ACTIVITY_TYPE");
-			property2.setAttribute("value", users.get(0) + " uploaded " + docname);
+			property2.setAttribute("value", users.get(0) + " uploaded "
+					+ docname);
 
 			String xmlXMPPMessage = XMLUtils.documentToString(doc,
 					"http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
 
-			XMPPBridge.getConnection("workbenchanalysis").sendMessage(
-					xmlXMPPMessage);
+			StartupServlet.sendToAnalysis(xmlXMPPMessage);
 
 		} catch (XMLException exc) {
 			System.err.println("DocUpload: " + exc.getMessage());

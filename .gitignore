@@ -1,4 +1,5 @@
 ﻿.*
+.gwt/
 *Passwords*
 CVS/
 gwt-unitCache/
@@ -9,3 +10,4 @@ warbuilder*
 development/
 classes/
 deploy/
+Development.gwt.xml

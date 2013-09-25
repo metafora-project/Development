@@ -26,9 +26,9 @@ public class VersionsManagement extends TableLayout {
 	 * HTML("["+DateTimeFormat.getMediumDateTimeFormat().format(new Date())+"]",
 	 * true);
 	 * 
-	 * if(value==1){ //nur zu Testzwecken erst einmal Werte f�r die if.
-	 * Sp�ter sollte ein Event mit oder String Bedingung sein (vom Browser an
-	 * Client -> Meldung, dass anderer Client etwas gemacht hat) Anchor a = new
+	 * if(value==1){ //nur zu Testzwecken erst einmal Werte f�r die if. Sp�ter
+	 * sollte ein Event mit oder String Bedingung sein (vom Browser an Client ->
+	 * Meldung, dass anderer Client etwas gemacht hat) Anchor a = new
 	 * Anchor("Task 1"); a.addClickHandler(new VersionsHandler("Task 1",
 	 * "12345")); box.setWidget(row, column-1, today); box.setWidget(row,
 	 * column, a); } if(value==2){ Anchor a = new Anchor("Task 2");

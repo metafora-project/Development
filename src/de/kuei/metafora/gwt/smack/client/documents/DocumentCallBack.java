@@ -21,8 +21,6 @@ public class DocumentCallBack implements AsyncCallback<List<ThinDocStructure>> {
 
 	@Override
 	public void onFailure(Throwable caught) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

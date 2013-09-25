@@ -13,15 +13,23 @@ import com.fourspaces.couchdb.ViewResults;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import de.kuei.metafora.gwt.smack.client.documents.DocumentService;
+import de.kuei.metafora.gwt.smack.server.xmpp.XMPPListener;
 import de.kuei.metafora.gwt.smack.shared.DocStructure;
 import de.kuei.metafora.gwt.smack.shared.ThinDocStructure;
 
 public class DocIdServiceImpl extends RemoteServiceServlet implements
 		DocumentService {
 
+	public static String tomcatserver = "https://metaforaserver.ku-eichstaett.de";
+	public static String server = "metaforaserver.ku-eichstaett.de";
+	public static String user = "admin";
+	public static String password = Passwords.COUCHDB;
+
+	private static final int port = 5984;
+	private static final String databaseName = "gwtfilebase";
+
 	// Represents the Documents in the couchDB
 	private static List<ThinDocStructure> idToDoc = null;
-	private static final String databaseName = "gwtfilebase";
 
 	/**
 	 * This method gets all documents with their complete "data" from the
@@ -38,12 +46,11 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 
 		System.out.println("getFileIds was called");
 
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 
 		Database db = session.getDatabase(databaseName);
 		ViewResults alldocs = db.getAllDocuments();
-		// Roter Consolenausdruck (n�chste Zeilen)
+
 		List<Document> docs = alldocs.getResults();
 		System.out.println(docs.size() + " Documents found");
 		DocStructure[] ids = new DocStructure[docs.size()];
@@ -76,8 +83,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public void setAttribute(String docId, String key, String value) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		try {
@@ -102,8 +108,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public String[] getRevisions(String fileId) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		try {
@@ -147,8 +152,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	 * 
 	 */
 	public static synchronized void setIdToDoc() {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, true, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		// ViewResults results = db.view("development/idToNameTime");
@@ -167,7 +171,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 			 * key=" foo.doc", value="1277942400000"}
 			 */
 			ThinDocStructure thinDoc = new ThinDocStructure(id, filename, time,
-					"http://" + StartupServlet.tomcatServer + "/");
+					"http://" + tomcatserver + "/");
 
 			idToDoc.add(thinDoc);
 		}
@@ -183,8 +187,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public DocStructure getDocument(String id) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		Document doc = null;
@@ -210,7 +213,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 			if (thinDoc.getDocId().equals(id))
 				return thinDoc;
 		}
-		// TODO Throw Exception instead?
+
 		return null;
 	}
 
@@ -222,8 +225,8 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	 *            Document from which the information should be transferred
 	 */
 	private DocStructure createDocStructure(Document doc) {
-		DocStructure docStructure = new DocStructure("http://"
-				+ StartupServlet.tomcatServer + "/");
+		DocStructure docStructure = new DocStructure("http://" + tomcatserver
+				+ "/");
 
 		if (doc.containsKey("filename")) {
 			docStructure.setDocname(doc.getString("filename"));
@@ -263,17 +266,15 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 			String filename, Date date) {
 		long time = date.getTime();
 		idToDoc.add(new ThinDocStructure(fileId, filename, "" + time, "http://"
-				+ StartupServlet.tomcatServer + "/"));
+				+ tomcatserver + "/"));
 
 		// propagate changes to all clients
 		try {
 			/*
 			 * send a message with the ID of the document such as:
 			 * "newDoc:12h23j436lkj3kj::foo.doc::1277942400000"
-			 * 
-			 * TODO Throw EventService-Event instead of wrong Comet-message
 			 */
-			CometSmackMapping.getInstance().newMessage("DocIdServiceImpl",
+			XMPPListener.getInstance().newMessage("DocIdServiceImpl",
 					fileId + ";" + filename, "DocIdService", date);
 		} catch (Exception e) {
 			System.err.println("DocIdServiceImpl.onDocumentPut(): "

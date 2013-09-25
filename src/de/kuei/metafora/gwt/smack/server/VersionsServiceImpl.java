@@ -21,48 +21,17 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 * Implementation of the VersionsService-interface to represent the
 	 * couchDB-knowledge about versions of planningtool-maps
 	 */
-	// TODO Put versions to VersionsMan. that are created at Workbench-Runtime?
+
+	public static String tomcatserver = "https://metaforaserver.ku-eichstaett.de";
+	public static String server = "metaforaserver.ku-eichstaett.de";
+	public static String user = "admin";
+	public static String password = Passwords.COUCHDB;
+
+	private static final int port = 5984;
+	private static final String databaseName = "gwtfilebase";
 
 	// Represents the Documents in the couchDB
 	private static List<ThinVersionStructure> idToDoc = null;
-	private static final String databaseName = "gwtfilebase";
-
-	// /**
-	// * This Method gets all documents with their complete "data" from the
-	// * CouchDB thus causing a lot of traffic. A combination of getIdToNames()
-	// * and getDocument(String) should therefore be preferred
-	// *
-	// * @return All DocStructures as created in
-	// * {@link #createDocStructure(Document)} with the documents from the
-	// * CouchDB
-	// *
-	// * @see de.kuei.metafora.gwt.smack.client.DocumentService#getFileIds()
-	// */
-	// public VersionStructure[] getFileIds() {
-	//
-	// System.out.println("getFileIds was called");
-	//
-	// Session session = new Session(server, port, "admin", Passwords.COUCHDB);
-	//
-	// Database db = session.getDatabase(databaseName);
-	// ViewResults alldocs = db.getAllDocuments();
-	// // Roter Consolenausdruck (n�chste Zeilen)
-	// List<Document> docs = alldocs.getResults();
-	// System.out.println(docs.size() + " Documents found");
-	// VersionStructure[] ids = new VersionStructure[docs.size()];
-	//
-	// for (int i = 0; i < docs.size(); i++) {
-	// Document d = docs.get(i);
-	// try {
-	// d = db.getDocument(d.getId());
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// }
-	//
-	// ids[i] = createDocStructure(d);
-	// }
-	// return ids;
-	// }
 
 	/**
 	 * Sets the attribute with this key of the Document with the given docId to
@@ -79,8 +48,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public void setAttribute(String docId, String key, String value) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		try {
@@ -105,8 +73,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public String[] getRevisions(String fileId) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		try {
@@ -125,8 +92,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public String[] getDocIds() {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 
 		Database db = null;
 		db = session.getDatabase(databaseName);
@@ -162,8 +128,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 * into idToDoc
 	 */
 	public static synchronized void setIdToDoc() {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		// ViewResults results = db.view("pt-maps/nameToVersions");
@@ -185,7 +150,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 			 */
 			ThinVersionStructure thinDoc = new ThinVersionStructure(id,
 					filename, values[0], values[1], "http://"
-							+ StartupServlet.tomcatServer + "/");
+							+ tomcatserver + "/");
 
 			idToDoc.add(thinDoc);
 		}
@@ -201,8 +166,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public VersionStructure getDocument(String id) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 		Database db = session.getDatabase(databaseName);
 
 		Document doc = null;
@@ -216,25 +180,6 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	/**
-	 * Gets the ip to a id.
-	 * 
-	 * @param id
-	 *            = ID of the document
-	 * @return ip of the document
-	 */
-	/*
-	 * @Override public String getToken(String id) { Session session = new
-	 * Session(server, port, "admin", Passwords.COUCHDB); Database db =
-	 * session.getDatabase(databaseName); String token = "0";
-	 * 
-	 * Document doc = null; try { doc = db.getDocument(id); } catch (IOException
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * if(doc != null && doc.containsKey("ip")){ token = doc.getString("ip"); }
-	 * return token; }
-	 */
-
-	/**
 	 * Gets the Version number of the document with the specified ID (directly
 	 * from the couchDB!) or -1 if this document is not a map or doesn't exist
 	 * 
@@ -244,8 +189,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	public String getVersion(String id) {
 		String version = "-1";
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB, false, false);
+		Session session = new Session(server, port, user, password);
 
 		Database db = null;
 		db = session.getDatabase(databaseName);
@@ -273,7 +217,7 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 */
 	private VersionStructure createDocStructure(Document doc) {
 		VersionStructure docStructure = new VersionStructure("http://"
-				+ StartupServlet.tomcatServer + "/");
+				+ tomcatserver + "/");
 
 		if (doc.containsKey("filename")) {
 			docStructure.setDocname(doc.getString("filename"));

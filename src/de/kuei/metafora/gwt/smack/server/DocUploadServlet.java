@@ -1,12 +1,9 @@
 package de.kuei.metafora.gwt.smack.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -25,12 +22,15 @@ import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.Session;
 
 public class DocUploadServlet extends HttpServlet {
-	// private static final String server = "141.78.99.238";
-	public static String server = StartupServlet.couchDbServer;
-	private static final int port = 5984; // wegen: http://127.0.0.1:5984/...
-	private static final String databaseName = "gwtfilebase"; // Name der
-																// Datenbank
-	private String docdata = null; // im anderen Filedata genannt
+
+	public static String server = "metaforaserver.ku-eichstaett.de";
+	public static String user = "admin";
+	public static String password = Passwords.COUCHDB;
+
+	private static final int port = 5984;
+	private static final String databaseName = "gwtfilebase";
+
+	private String docdata = null;
 	private String contenttype = null;
 
 	public void doGet(HttpServletRequest req, HttpServletResponse response) {
@@ -188,8 +188,7 @@ public class DocUploadServlet extends HttpServlet {
 	private String[] getDocFromDatabase(String id) {
 		String[] doc = null;
 
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB);
+		Session session = new Session(server, port, user, password);
 
 		Database db = null;
 		db = session.getDatabase(databaseName);
@@ -229,8 +228,7 @@ public class DocUploadServlet extends HttpServlet {
 	 *            Conten of the file to be saved
 	 */
 	private void putDocToDatabase(String docname, String doctype, String docdata) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB);
+		Session session = new Session(server, port, user, password);
 
 		Database db = null;
 		db = session.getDatabase(databaseName);
@@ -268,8 +266,7 @@ public class DocUploadServlet extends HttpServlet {
 	 */
 	private void updateDoc(String docname, String doctype, String docdata,
 			String docid) {
-		Session session = new Session(StartupServlet.couchDbServer, 5984,
-				"admin", Passwords.COUCHDB);
+		Session session = new Session(server, port, user, password);
 
 		Database db = null;
 		db = session.getDatabase(databaseName);

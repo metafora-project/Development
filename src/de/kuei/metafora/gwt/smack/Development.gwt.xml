@@ -20,17 +20,17 @@
 	<!-- English -->
   	<extend-property name="locale" values="en"/>
   	<!-- Greek -->
-  	<!-- extend-property name="locale" values="gr"/ -->
+  	<extend-property name="locale" values="gr"/>
   	<!-- Hebrew -->
-  	<!-- extend-property name="locale" values="he"/ -->
+  	<extend-property name="locale" values="he"/>
   	<!-- German -->
-  	<!-- extend-property name="locale" values="de"/ -->
+  	<extend-property name="locale" values="de"/>
   	<!-- Spanish -->
-  	<!-- extend-property name="locale" values="es"/ -->
+  	<extend-property name="locale" values="es"/>
   	<!-- Portuguese -->
-  	<!-- extend-property name="locale" values="pt"/ -->
+  	<extend-property name="locale" values="pt"/>
   	<!-- Chinese -->
-  	<!-- extend-property name="locale" values="zh"/ -->
+  	<extend-property name="locale" values="zh"/>
   	<!-- default value English -->
   	<set-property-fallback name="locale" value="en"/>
 

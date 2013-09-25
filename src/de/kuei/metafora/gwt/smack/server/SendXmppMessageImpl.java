@@ -9,7 +9,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import de.kuei.metafora.gwt.smack.client.SendXmppMessage;
 import de.kuei.metafora.gwt.smack.server.xml.XMLUtils;
-import de.kuei.metafora.xmpp.XMPPBridge;
 
 public class SendXmppMessageImpl extends RemoteServiceServlet implements
 		SendXmppMessage {
@@ -17,7 +16,7 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 	@Override
 	public String sendXmppMessage(String message) {
 		try {
-			XMPPBridge.getConnection("workbenchcommand").sendMessage(message);
+			StartupServlet.sendToCommand(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -25,12 +24,10 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String sendOpenCommandMessage(Vector<String> users, String groupId, String challengeId,
-			String challengeName, String name, String id, String link,
-			String version, String ip) {
+	public String sendOpenCommandMessage(Vector<String> users, String groupId,
+			String challengeId, String challengeName, String name, String id,
+			String link, String version, String ip) {
 		try {
-			// TODO: IP/token/username
-
 			Document doc = XMLUtils.createDocument();
 
 			Element action = doc.createElement("action");
@@ -40,11 +37,7 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 			Element actiontype = doc.createElement("actiontype");
 			actiontype.setAttribute("type", "DISPLAY_STATE_URL");
 			actiontype.setAttribute("classification", "other");
-			if (StartupServlet.productive) {
-				actiontype.setAttribute("logged", "true");
-			} else {
-				actiontype.setAttribute("logged", "false");
-			}
+			actiontype.setAttribute("logged", "" + StartupServlet.logged);
 			action.appendChild(actiontype);
 
 			if (!users.isEmpty()) {
@@ -70,7 +63,6 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 			property.setAttribute("name", "NAME");
 			property.setAttribute("value", name);
 
-			// TODO: finish
 			Element property2 = doc.createElement("property");
 			properties.appendChild(property2);
 			property2.setAttribute("name", "ID");
@@ -89,28 +81,16 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 			Element content = doc.createElement("content");
 			object.appendChild(content);
 
-			if(StartupServlet.productive){
-				Element property6 = doc.createElement("property");
-				content.appendChild(property6);
-				property6.setAttribute("name", "SENDING_TOOL");
-				property6.setAttribute("value", "WORKBENCH");
-				
-				property6 = doc.createElement("property");
-				content.appendChild(property6);
-				property6.setAttribute("name", "RECEIVING_TOOL");
-				property6.setAttribute("value", "METAFORA");
-			} else{
-				Element property6 = doc.createElement("property");
-				content.appendChild(property6);
-				property6.setAttribute("name", "SENDING_TOOL");
-				property6.setAttribute("value", "WORKBENCH_TEST");
-				
-				property6 = doc.createElement("property");
-				content.appendChild(property6);
-				property6.setAttribute("name", "RECEIVING_TOOL");
-				property6.setAttribute("value", "METAFORA_TEST");
-			}
-			
+			Element property6 = doc.createElement("property");
+			content.appendChild(property6);
+			property6.setAttribute("name", "SENDING_TOOL");
+			property6.setAttribute("value", StartupServlet.sending_tool);
+
+			property6 = doc.createElement("property");
+			content.appendChild(property6);
+			property6.setAttribute("name", "RECEIVING_TOOL");
+			property6.setAttribute("value", StartupServlet.metafora);
+
 			Element property7 = doc.createElement("property");
 			content.appendChild(property7);
 			property7.setAttribute("name", "GROUP_ID");
@@ -130,8 +110,7 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 					"http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
 
 			// send command for Home to command channel
-			XMPPBridge.getConnection("workbenchcommand").sendMessage(
-					xmlXMPPMessage);
+			StartupServlet.sendToCommand(xmlXMPPMessage);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

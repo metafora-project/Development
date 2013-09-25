@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.xml.client.Document;
 
 import de.kuei.metafora.gwt.smack.client.documents.DocumentCallBack;
 import de.kuei.metafora.gwt.smack.client.documents.DocumentService;
@@ -91,7 +90,6 @@ public class Workbench extends HorizontalPanel implements EntryPoint {
 	private BreakingNewsListener breakingNewsListener;
 	private DocumentsListener documentsListener;
 	private VersionsListener versionsListener;
-
 
 	public void onModuleLoad() {
 		hPanel1 = new HorizontalPanel();
@@ -305,58 +303,4 @@ public class Workbench extends HorizontalPanel implements EntryPoint {
 				});
 	}
 
-	// TODO remove this method after moving it to server-side
-/*	public void onMessage(List<? extends Serializable> messages) {
-		for (int i = 0; i < messages.size(); i++) {
-			msg = messages.get(i).toString().split("::", 3);
-			if (msg[0].contains("command")) {
-				if (msg[2].contains("MAP_VERSION_SAVED")) {
-					message = msg[2];
-					try {
-						doc = XMLParser.parse(message);
-					} catch (Exception e) {
-						System.out.println("Could not parse XML: " + e);
-						return;
-					}
-
-					NodeList elem = doc.getElementsByTagName("user");
-					String ip = (((Element) elem.item(0))).getAttribute("ip");
-
-					NodeList elements = doc.getElementsByTagName("property");
-
-					for (int k = 0; k < elements.getLength(); k++) {
-
-						if (((Element) elements.item(k)).getAttribute("name")
-								.equals("NAME")) {
-							name = (String) ((Element) elements.item(k))
-									.getAttribute("value");
-						}
-
-						if (((Element) elements.item(k)).getAttribute("name")
-								.equals("ID")) {
-							id = (String) ((Element) elements.item(k))
-									.getAttribute("value");
-						}
-
-						if (((Element) elements.item(k)).getAttribute("name")
-								.equals("LINK")) {
-							link = (String) ((Element) elements.item(k))
-									.getAttribute("value");
-						}
-
-						if (((Element) elements.item(k)).getAttribute("name")
-								.equals("VERSION")) {
-							version = (String) ((Element) elements.item(k))
-									.getAttribute("value");
-						}
-					}
-					Anchor anchor = new Anchor(name);
-					anchor.addClickHandler(new VersionsHandler(name, id, link,
-							version, ip));
-					vm.add(anchor, msg[1]);
-				}
-			}
-		}
-	}
-*/
 }

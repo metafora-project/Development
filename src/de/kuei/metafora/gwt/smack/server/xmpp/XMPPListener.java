@@ -1,38 +1,41 @@
-package de.kuei.metafora.gwt.smack.server;
+package de.kuei.metafora.gwt.smack.server.xmpp;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Date;
 
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
+import org.jivesoftware.smackx.packet.DelayInfo;
+import org.jivesoftware.smackx.packet.DelayInformation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import de.kuei.metafora.gwt.smack.server.StartupServlet;
 import de.kuei.metafora.gwt.smack.server.user.GroupMembers;
 import de.kuei.metafora.gwt.smack.server.xml.XMLException;
 import de.kuei.metafora.gwt.smack.server.xml.XMLUtils;
 import de.kuei.metafora.gwt.smack.shared.event.breakingnews.BreakingNewsEventImpl;
 import de.kuei.metafora.gwt.smack.shared.eventservice.EventServiceDomains;
-import de.kuei.metafora.xmpp.XMPPMessageTimeListener;
 import de.novanic.eventservice.client.event.domain.DomainFactory;
 import de.novanic.eventservice.service.registry.EventRegistryFactory;
 
-public class CometSmackMapping implements XMPPMessageTimeListener {
+public class XMPPListener implements PacketListener {
 
-	private static CometSmackMapping mapping = null;
+	private static XMPPListener instance = null;
 
-	public static CometSmackMapping getInstance() {
-		if (mapping == null) {
-			mapping = new CometSmackMapping();
+	public static XMPPListener getInstance() {
+		if (instance == null) {
+			instance = new XMPPListener();
 		}
-		return mapping;
+		return instance;
 	}
 
-	private CometSmackMapping() {
-	}
-
-	@Override
 	public void newMessage(String user, String message, String chat, Date time) {
 		try {
 			message = message.replaceAll("\n", "");
@@ -62,7 +65,7 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 						if (type.toLowerCase().equals("landmark")) {
 
 							String l2l2Tag = null;
-							String iconURL = StartupServlet.apacheserver
+							String iconURL = StartupServlet.apacheServer
 									+ "/images/l2l2/generic.jpg";
 							String description = "";
 							long timestamp = time.getTime();
@@ -100,7 +103,7 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 									 * this L2L2-category and update iconURL
 									 */
 									try {
-										String urlText = StartupServlet.apacheserver
+										String urlText = StartupServlet.apacheServer
 												+ "/images/l2l2/"
 												+ l2l2Tag.toLowerCase()
 												+ ".jpg";
@@ -235,6 +238,55 @@ public class CometSmackMapping implements XMPPMessageTimeListener {
 					return;
 				}
 			}
+		}
+	}
+
+	@Override
+	public void processPacket(Packet packet) {
+		try {
+			handlePacket(packet);
+		} catch (Exception e) {
+			System.err
+					.println("PlanningTool: XMPPListener: Handle packet exception! "
+							+ e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	public void handlePacket(Packet packet) {
+		if (packet instanceof Message) {
+			Message msg = (Message) packet;
+
+			if (msg.getBody() == null) {
+				return;
+			}
+
+			String from = msg.getFrom();
+			String name = "";
+			String chat = from;
+
+			int splitPos = from.indexOf('/');
+			if (splitPos > 0) {
+				name = from.substring(splitPos + 1, from.length());
+				chat = from.substring(0, splitPos);
+			}
+
+			Date time = new Date();
+
+			Collection<PacketExtension> extensions = packet.getExtensions();
+			for (PacketExtension e : extensions) {
+				if (e instanceof DelayInfo) {
+					DelayInfo d = (DelayInfo) e;
+					time = d.getStamp();
+					break;
+				} else if (e instanceof DelayInformation) {
+					DelayInformation d = (DelayInformation) e;
+					time = d.getStamp();
+					break;
+				}
+			}
+
+			newMessage(name, msg.getBody(), chat, time);
 		}
 	}
 }

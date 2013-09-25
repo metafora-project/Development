@@ -37,7 +37,6 @@ public class VersionsCallBack implements
 
 			anchor.setHref(doc.getUrl());
 
-			// TODO: add user to anchor
 			anchor.addClickHandler(new VersionsHandler(doc.getDocname(), doc
 					.getDocId(), doc.getUrl(), doc.getVersion()));
 			String time = doc.getTime();
