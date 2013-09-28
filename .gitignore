@@ -11,3 +11,8 @@ development/
 classes/
 deploy/
 Development.gwt.xml
+*.jar
+*.class
+war/
+bin/
+
