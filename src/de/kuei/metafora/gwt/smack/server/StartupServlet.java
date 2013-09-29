@@ -24,13 +24,13 @@ public class StartupServlet extends HttpServlet {
 	public static String couchDbServer = "metaforaserver.ku-eichstaett.de";
 	public static String apacheServer = "http://metaforaserver.ku.de";
 	public static String xmpp = "metaforaserver.ku.de";
-
+	
 	private static XmppMUC logger;
 	private static XmppMUC analysis;
 	private static XmppMUC command;
 
 	public void init() {
-		System.err.println("PlanningTool StartupServlet init...");
+		System.err.println("Workbench StartupServlet init...");
 
 		MysqlInitConnector.getInstance().loadData(moduleName);
 
@@ -63,6 +63,8 @@ public class StartupServlet extends HttpServlet {
 				.getAServer("tomcat");
 
 		StartupServlet.couchDbServer = couchDBServerDesc.getServer();
+		
+		
 		StartupServlet.tomcatServer = tomcatServerDesc.getServer();
 
 		System.err.println("Config DocIdServiceImpl...");

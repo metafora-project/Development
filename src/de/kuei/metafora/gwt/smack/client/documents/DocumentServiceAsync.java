@@ -39,4 +39,6 @@ public interface DocumentServiceAsync {
 	 * @see DocumentService#getThinDocument(String)
 	 */
 	void getThinDocument(String id, AsyncCallback<ThinDocStructure> callback);
+
+	void getTomcatServer(AsyncCallback<String> callback);
 }

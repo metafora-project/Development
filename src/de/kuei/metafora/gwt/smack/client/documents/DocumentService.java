@@ -11,6 +11,8 @@ import de.kuei.metafora.gwt.smack.shared.ThinDocStructure;
 @RemoteServiceRelativePath("documents")
 public interface DocumentService extends RemoteService {
 
+	public String getTomcatServer();
+	
 	/**
 	 * This Method gets all documents with their complete "data" from the
 	 * CouchDB thus causing a lot of traffic. A combination of getIdToNames()

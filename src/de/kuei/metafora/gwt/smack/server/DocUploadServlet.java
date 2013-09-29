@@ -25,7 +25,7 @@ public class DocUploadServlet extends HttpServlet {
 
 	public static String server = "metaforaserver.ku-eichstaett.de";
 	public static String user = "admin";
-	public static String password = Passwords.COUCHDB;
+	public static String password = "";
 
 	private static final int port = 5984;
 	private static final String databaseName = "gwtfilebase";

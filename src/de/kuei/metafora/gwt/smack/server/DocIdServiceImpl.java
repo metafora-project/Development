@@ -23,7 +23,7 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 	public static String tomcatserver = "https://metaforaserver.ku-eichstaett.de";
 	public static String server = "metaforaserver.ku-eichstaett.de";
 	public static String user = "admin";
-	public static String password = Passwords.COUCHDB;
+	public static String password = "password";
 
 	private static final int port = 5984;
 	private static final String databaseName = "gwtfilebase";
@@ -160,20 +160,23 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 
 		idToDoc = new ArrayList<ThinDocStructure>();
 
-		for (Document doc : results.getResults()) {
-			String id = doc.getId();
+		if (results != null) {
+			for (Document doc : results.getResults()) {
+				String id = doc.getId();
 
-			String filename = doc.getString("key");
-			String time = doc.getString("value");
+				String filename = doc.getString("key");
+				String time = doc.getString("value");
 
-			/*
-			 * typical result-document: {_id = aa7f5d7634c2606e003cbbd78400721a,
-			 * key=" foo.doc", value="1277942400000"}
-			 */
-			ThinDocStructure thinDoc = new ThinDocStructure(id, filename, time,
-					"http://" + tomcatserver + "/");
+				/*
+				 * typical result-document: {_id =
+				 * aa7f5d7634c2606e003cbbd78400721a, key=" foo.doc",
+				 * value="1277942400000"}
+				 */
+				ThinDocStructure thinDoc = new ThinDocStructure(id, filename,
+						time, "http://" + tomcatserver + "/");
 
-			idToDoc.add(thinDoc);
+				idToDoc.add(thinDoc);
+			}
 		}
 	}
 
@@ -280,5 +283,10 @@ public class DocIdServiceImpl extends RemoteServiceServlet implements
 			System.err.println("DocIdServiceImpl.onDocumentPut(): "
 					+ e.toString());
 		}
+	}
+
+	@Override
+	public String getTomcatServer() {
+		return StartupServlet.tomcatServer;
 	}
 }

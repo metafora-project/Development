@@ -51,8 +51,13 @@ public class Workbench extends HorizontalPanel implements EntryPoint {
 
 	// object needed to implement i18n through Languages interface
 	final static Languages language = GWT.create(Languages.class);
+
 	private static GroupMemberListenerAsync groupMemberListener = GWT
 			.create(GroupMemberListener.class);
+
+	private static DocumentServiceAsync documentService = GWT
+			.create(DocumentService.class);
+
 	public static String token = null;
 	public static String groupId = null;
 	public static String challengeId = null;
@@ -91,7 +96,24 @@ public class Workbench extends HorizontalPanel implements EntryPoint {
 	private DocumentsListener documentsListener;
 	private VersionsListener versionsListener;
 
+	private String tomcatServer = "https://metafora-project.de";
+
 	public void onModuleLoad() {
+
+		documentService.getTomcatServer(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+
+			@Override
+			public void onSuccess(String result) {
+				tomcatServer = result;
+				enterF.setAction(tomcatServer
+						+ "/workbench/development/fileupload");
+			}
+		});
+
 		hPanel1 = new HorizontalPanel();
 		hPanel2 = new HorizontalPanel();
 		hPanel3 = new HorizontalPanel();
@@ -161,12 +183,6 @@ public class Workbench extends HorizontalPanel implements EntryPoint {
 		Label dc = new Label(language.Documents());
 		dc.setStyleName("heading");
 		vPanel2.add(dc);
-
-		if (testServer.equals("true")) {
-			enterF.setAction("https://metafora.ku-eichstaett.de/workbench/development/fileupload");
-		} else {
-			enterF.setAction("https://metaforaserver.ku.de/workbench/development/fileupload");
-		}
 
 		enterF.setEncoding(FormPanel.ENCODING_MULTIPART);
 		enterF.setMethod(FormPanel.METHOD_POST);
