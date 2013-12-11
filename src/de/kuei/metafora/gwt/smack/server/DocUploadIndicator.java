@@ -100,7 +100,7 @@ public class DocUploadIndicator {
 					+ docname);
 
 			String xmlXMPPMessage = XMLUtils.documentToString(doc,
-					"http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
+					"http://data.metafora-project.de/dtd/commonformat.dtd");
 
 			StartupServlet.sendToAnalysis(xmlXMPPMessage);
 

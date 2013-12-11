@@ -20,10 +20,10 @@ public class StartupServlet extends HttpServlet {
 	public static String metafora = "METAFORA";
 	public static boolean logged = true;
 
-	public static String tomcatServer = "https://metaforaserver.ku.de";
-	public static String couchDbServer = "metaforaserver.ku-eichstaett.de";
-	public static String apacheServer = "http://metaforaserver.ku.de";
-	public static String xmpp = "metaforaserver.ku.de";
+	public static String tomcatServer = "https://metafora-project.de";
+	public static String couchDbServer = "metafora-project.de";
+	public static String apacheServer = "http://metafora-project.de";
+	public static String xmpp = "metafora-project.de";
 	
 	private static XmppMUC logger;
 	private static XmppMUC analysis;

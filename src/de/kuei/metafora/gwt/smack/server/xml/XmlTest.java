@@ -45,7 +45,7 @@ public class XmlTest {
 			object.setAttribute("type", "<unser xml>");
 			action.appendChild(object);
 			
-			String xml = XMLUtils.documentToString(doc, "http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
+			String xml = XMLUtils.documentToString(doc, "http://data.metafora-project.de/dtd/commonformat.dtd");
 			System.out.println(xml);
 			
 			Document doc2 = XMLUtils.parseXMLString(xml, false);
@@ -113,7 +113,7 @@ public class XmlTest {
 			name.setAttribute("value", "aName");
 			properties.appendChild(name);
 			
-			String contentxml = XMLUtils.documentToString(content, "http://metafora.ku-eichstaett.de/dtd/planningtoolelement.dtd");
+			String contentxml = XMLUtils.documentToString(content, "http://data.metafora-project.de/dtd/planningtoolelement.dtd");
 			System.out.println(contentxml);
 			
 			System.err.println("vor parse");
@@ -129,7 +129,7 @@ public class XmlTest {
 			Element elem = (Element)o;
 			elem.setAttribute("type", contentxml);
 			
-			String alles = XMLUtils.documentToString(doc, "http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
+			String alles = XMLUtils.documentToString(doc, "http://data.metafora-project.de/dtd/commonformat.dtd");
 			System.out.println(alles);
 			
 			System.err.println("vor parse");

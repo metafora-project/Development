@@ -16,26 +16,19 @@ public class ThinVersionStructure implements Serializable, IsSerializable {
 	// String token;
 	String version;
 
-	public ThinVersionStructure(){
-		
+	public ThinVersionStructure() {
+
 	}
-	
+
 	public ThinVersionStructure(String server) {
-		urlPrefix = server+urlPrefix;
+		urlPrefix = server + urlPrefix;
 
 	}
-
-	/*
-	 * public ThinVersionStructure(String docId, String docname) { this.docId =
-	 * docId; this.docname = docname; url =
-	 * "http://metafora.ku-eichstaett.de:8081/workbench/development/fileupload?id="
-	 * + docId; }
-	 */
 
 	public ThinVersionStructure(String docId, String docname, String version,
 			String time, String server) {
-		urlPrefix = server+urlPrefix;
-		
+		urlPrefix = server + urlPrefix;
+
 		this.docId = docId;
 		this.docname = docname;
 		url = urlPrefix + docId;

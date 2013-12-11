@@ -107,7 +107,7 @@ public class SendXmppMessageImpl extends RemoteServiceServlet implements
 			property7.setAttribute("value", challengeName);
 
 			String xmlXMPPMessage = XMLUtils.documentToString(doc,
-					"http://metafora.ku-eichstaett.de/dtd/commonformat.dtd");
+					"http://data.metafora-project.de/dtd/commonformat.dtd");
 
 			// send command for Home to command channel
 			StartupServlet.sendToCommand(xmlXMPPMessage);

@@ -20,8 +20,8 @@ import de.kuei.metafora.gwt.smack.shared.ThinDocStructure;
 public class DocIdServiceImpl extends RemoteServiceServlet implements
 		DocumentService {
 
-	public static String tomcatserver = "https://metaforaserver.ku-eichstaett.de";
-	public static String server = "metaforaserver.ku-eichstaett.de";
+	public static String tomcatserver = "https://metafora-project.de";
+	public static String server = "metafora-project.de";
 	public static String user = "admin";
 	public static String password = "password";
 

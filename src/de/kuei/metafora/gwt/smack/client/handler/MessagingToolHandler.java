@@ -16,8 +16,8 @@ public class MessagingToolHandler implements ClickHandler {
 	// String url =
 	// "http://web.lkldev.ioe.ac.uk/MonitorInterventionMetafora/?receiver=METAFORA_TEST&userType=METAFORA_USER";
 	// test system
-	private static String metaforaURL = "https://metafora.ku.de/home/home/usergroup?url=http%3A%2F%2Fweb.lkldev.ioe.ac.uk%2FMonitorInterventionMetafora%2F%3FuserType%3DMETAFORA_USER";
-	private static String metaforaServerURL = "https://metaforaserver.ku.de/home/home/usergroup?url=http%3A%2F%2Fweb.lkldev.ioe.ac.uk%2FMonitorInterventionMetafora%2F%3FuserType%3DMETAFORA_USER";
+	private static String metaforaURL = "https://metafora-project.de/home/home/usergroup?url=http%3A%2F%2Fweb.lkldev.ioe.ac.uk%2FMonitorInterventionMetafora%2F%3FuserType%3DMETAFORA_USER";
+	private static String metaforaServerURL = "https://metafora-project.de/home/home/usergroup?url=http%3A%2F%2Fweb.lkldev.ioe.ac.uk%2FMonitorInterventionMetafora%2F%3FuserType%3DMETAFORA_USER";
 
 	public MessagingToolHandler() {
 		fMessagingTool = new Frame();

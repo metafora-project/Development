@@ -22,8 +22,8 @@ public class VersionsServiceImpl extends RemoteServiceServlet implements
 	 * couchDB-knowledge about versions of planningtool-maps
 	 */
 
-	public static String tomcatserver = "https://metaforaserver.ku-eichstaett.de";
-	public static String server = "metaforaserver.ku-eichstaett.de";
+	public static String tomcatserver = "https://metafora-project.de";
+	public static String server = "metafora-project.de";
 	public static String user = "admin";
 	public static String password = "password";
 
